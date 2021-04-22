@@ -1,7 +1,7 @@
-USE store7db;
+USE stores7new;
 
 -- 1. Obtener un listado de todos los clientes y sus direcciones. 
-SELECT customer_num, adress1, adress2 FROM customer
+SELECT customer_num, address1, address2 FROM customer
 
 -- 2. Obtener el listado anterior pero sólo los clientes que viven en el estado de California “CA”.
 SELECT fname, lname, address1, address2 FROM customer
@@ -16,7 +16,7 @@ GROUP BY city
 SELECT city FROM customer
 WHERE state = 'CA'
 GROUP BY city
-ORDER BY name
+ORDER BY city
 
 -- 5. Mostrar la dirección sólo del cliente 103. (customer_num)
 SELECT address1, address2 FROM customer WHERE customer_num = 103;
@@ -97,5 +97,5 @@ SELECT
     SUM(ship_weight) AS cant_total_libras
 FROM orders
 GROUP BY ship_date
-    HAVING cant_total_libras >= 30
+    HAVING SUM(ship_weight) >= 30
 ORDER BY cant_total_libras DESC

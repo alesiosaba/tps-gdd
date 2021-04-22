@@ -28,7 +28,7 @@ CREATE TABLE Clientes(
     codCliente INTEGER PRIMARY KEY,
     nombre VARCHAR(60) NOT NULL,
     apellido VARCHAR(60) NOT NULL,
-    nroCuit BIGINTEGER UNIQUE,
+    nroCuit BIGINT UNIQUE,
     direccion VARCHAR(60),
     codProvincia SMALLINT REFERENCES Provincias,
     ciudad VARCHAR(60),
@@ -50,14 +50,15 @@ CREATE TABLE Facturas(
     numeroFactura INTEGER PRIMARY KEY,
     codCliente INTEGER NOT NULL REFERENCES Clientes,
     fechaFactura DATE NOT NULL,
-    fechaVencimiento DATE NOT NULL CHECK (fechaVencimiento >= fechaFactura)
+    fechaVencimiento DATE NOT NULL,
+	CHECK (fechaVencimiento >= fechaFactura)
 )
 
 CREATE TABLE ItemsFactura(
     nroItem SMALLINT,
     numeroFactura INTEGER REFERENCES Facturas,
-    codProducto INTEGER REFERENCES Productos,
+    codProducto SMALLINT REFERENCES Productos,
     precioUnitario NUMERIC(12,2),
-    cantidad INTEGER NOT NULL CHECK (cantidad >0),
-    PRIMARY KEY (numeroroFactura,nroItem)
+    cantidad INTEGER NOT NULL CHECK (cantidad > 0),
+    PRIMARY KEY (numeroFactura,nroItem)
 )
