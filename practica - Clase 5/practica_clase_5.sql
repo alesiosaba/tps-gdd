@@ -62,7 +62,7 @@ ORDER BY customer_num
 -- descripción (product_types.description), unidad (units.unit), precio unitario (unit_price) y Precio Junio (precio unitario + 20%).
 SELECT 
     manu_name,
-    stock_num,
+    p.stock_num,
     pt.description,
     u.unit,
     unit_price,
@@ -73,7 +73,7 @@ FROM products p JOIN product_types pt ON (p.stock_num = pt.stock_num)
                 JOIN units u ON (p.unit_code = u.unit_code)
     
 
---7. Se requiere un listado de los items de la orden de pedido Nro. 1004 con los siguientes datos:
+-- 7. Se requiere un listado de los items de la orden de pedido Nro. 1004 con los siguientes datos:
 -- Número de item (item_num), descripción de cada producto (product_types.description), cantidad (quantity) y precio total (unit_price*quantity).
 SELECT
     item_num,
@@ -83,11 +83,28 @@ SELECT
 FROM items i JOIN product_types p ON (i.stock_num = p.stock_num)
 WHERE order_num = 1004
 
---8. Informar el nombre del fabricante (manu_name) y el tiempo de envío (lead_time) de los ítems de las Órdenes del cliente 104.
+-- 8. Informar el nombre del fabricante (manu_name) y el tiempo de envío (lead_time) de los ítems de las Órdenes del cliente 104.
+SELECT
+	DISTINCT manu_name,
+	lead_time 
+FROM items i
+		JOIN manufact m ON (i.manu_code = m.manu_code)
+		JOIN orders o ON (o.order_num = i.order_num)
+WHERE o.customer_num = 104
 
-
---9. Se requiere un listado de las todas las órdenes de pedido con los siguientes datos: Número de orden (order_num), fecha de la orden (order_date), número de ítem (item_num), descripción de cada producto (description), cantidad (quantity) y precio total (unit_price*quantity).
-
+-- 9. Se requiere un listado de las todas las órdenes de pedido con los siguientes datos:
+-- Número de orden (order_num), fecha de la orden (order_date), número de ítem (item_num), descripción de cada producto (description), cantidad (quantity) y precio total (unit_price*quantity).
+SELECT 
+	o.order_num,
+	order_date,
+	item_num,
+	description,
+	quantity, 
+	(unit_price * quantity) precio_total 
+FROM orders o
+		JOIN items i ON (i.order_num = o.order_num)
+		JOIN product_types pt ON (pt.stock_num = i.stock_num)
+ORDER BY o.order_num
 
 --10. Obtener un listado con la siguiente información: Apellido (lname) y Nombre (fname) del Cliente separado por coma, Número de teléfono (phone) en formato (999) 999-9999. Ordenado por apellido y nombre.
 
