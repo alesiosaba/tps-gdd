@@ -1,1 +1,0 @@
-USE store7new;
