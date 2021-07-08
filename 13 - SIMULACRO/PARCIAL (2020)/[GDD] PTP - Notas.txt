@@ -1,0 +1,179 @@
+# [GDD] PTP - Notas
+---
+Estructura:
+- 2 preguntas teoricas (de alguno de los 4 apuntes).
+    - 1 corta (10/15 reng)
+    - 1 larga (1 carilla)
+- Práctica:
+    - SQL Complejo (puede venir con creación de vista)
+    - Trigger
+    - Stored Procedure
+
+Llega 9:30 por mail y lo mandamos por mail
+Duración: 3hs
+nota: se corrige en semana y media.
+
+Meet: meet.google.com/mek-ihbd-ajb  
+
+Casillas donde enviar:
+hpuelman@gmail.com
+jzaffaroni@frba.utn.edu.ar
+jzaffaroni@gmail.com
+
+---
+## Recursos
+---
+### Triggers
+```sql
+CREATE TABLE Products_historia_precios(
+	stock_historia_id int IDENTITY(1,1) PRIMARY KEY,
+	stock_num smallint,
+	manu_code char(3),
+	fechaHora datetime,
+	usuario varchar(20),
+	unit_price_old decimal(6,2),
+	unit_price_new decimal(6,2),
+	estado char DEFAULT 'A' CHECK(estado IN('A','I')),
+);
+GO
+
+CREATE TRIGGER auditoriaProductos
+ON products
+AFTER UPDATE /*INSTEAD OF DELETE / INSTEAD OF INSERT*/
+AS
+BEGIN
+	INSERT INTO Products_historia_precios 
+	(stock_num, manu_code,fechaHora,usuario,
+	unit_price_old, unit_price_new)
+	SELECT d.stock_num, d.manu_code,getDate(),'user',
+	d.unit_price, i.unit_price
+	FROM deleted d
+	JOIN inserted i ON(d.stock_num = i.stock_num)
+END
+GO
+```
+### Stored Procedures
+```sql
+CREATE PROCEDURE nombreProcedure /*nombre*/ @inputName DATETIME/*tipo de input*/ AS
+BEGIN
+	-- Creación de cursor
+	DECLARE NameCursor -- cursor para recorrer la tabla
+	CURSOR FOR SELECT data_to_get /*pk de tabla o ¿data a recorrer?*/ from tableName /*tabla a recorrer*/; 
+
+	-- Declarado de variables donde guardar info a guardar
+	DECLARE @variable1 INT, @variable2 INT, @variable3 DATETIME, @variable4 INT; 
+	
+	-- Inicio de cursor
+	OPEN NameCursor; -- apertura de cursor
+	FETCH NEXT FROM NameCursor INTO @variable1 -- obtención de primer campo
+	
+	WHILE @@FETCH_STATUS = 0 -- mientras cursor tenga data...
+	BEGIN 
+		/*operaciones a realizar*/
+
+		FETCH NEXT FROM NameCursor INTO @variable1 -- tomo nuevo item
+	END; -- cierre del loop
+	
+	CLOSE NameCursor; -- cierro el cursor
+	DEALLOCATE NameCursor; -- lo saco de memoria
+END;
+GO
+```
+
+### Queries complejas
+
+```sql
+LEFT JOIN products p ON (i.stock_num = p.stock_num AND i.manu_code= p.manu_code)
+LEFT JOIN product_types t ON (p.stock_num = t.stock_num)
+LEFT JOIN manufact m ON (p.manu_code = m.manu_code)
+LEFT JOIN orders o ON (c.customer_num = o.customer_num)
+LEFT JOIN state s ON (c.state = s.state)
+```
+
+```sql
+sum(i.quantity * i.unit_price) montoTotal
+c.lname+', '+ c.fname 'Apellido, Nombre'
+MONTH(order_date) mes
+```
+
+#### Views
+```sql
+CREATE VIEW ClientesConMultiplesOrdenes 
+(customer_number,fname,lname)
+AS
+SELECT c.customer_num, fname, lname
+	FROM customer c JOIN orders o ON (c.customer_num=o.customer_num)
+	GROUP BY c.customer_num, fname, lname
+	HAVING COUNT(order_num)>1;
+GO
+```
+#### Otras sentencias
+```sql
+-- INSERT INTO
+INSERT INTO Productos_HRO (stock_num,manu_code) 
+VALUES (303,'HRO');
+
+-- TRANSACTION
+BEGIN TRANSACTION
+ROLLBACK TRANSACTION
+COMMIT TRANSACTION
+
+-- SORT KEY
+SELECT 1 sortKey,i.stock_num, sum(i.quantity) cantidad
+	FROM items i
+	WHERE i.stock_num IN 
+		(SELECT TOP 2 stock_num FROM items i2 
+		GROUP BY i2.stock_num
+		ORDER BY sum(i2.quantity) DESC )
+	GROUP BY i.stock_num
+UNION 
+SELECT 2 sortKey,i.stock_num, sum(i.quantity) cantidad
+	FROM items i
+	WHERE i.stock_num IN 
+		(SELECT TOP 2 stock_num FROM items i2 
+		GROUP BY i2.stock_num
+		ORDER BY sum(i2.quantity) ASC)
+	GROUP BY i.stock_num
+ORDER BY sortKey;
+GO
+
+
+```
+
+### OTROS
+https://www.notion.so/GDD-Practica-Apuntes-0dafed4743f94798ab2f01975df77ce0
+
+---
+## TODO
+---
+- [ ] Pre Parcial
+	- [X] Repasar Simulacro comentando todo
+	- [X] Preparar SetUp
+		- [X] Pantallas
+		- [X] PDFs
+		- [X] Subcarpeta abierta
+		- [X] Google docs
+	- [ ] Nueva query sobre db
+
+- [X] Clases pendientes
+    - [X] 19
+    - [X] 21
+    - [X] 23
+
+- [X] Recursos
+    - [X] Template triggers
+    - [X] Template SP
+    - [X] Líneas de queries complejas
+
+- [X] Ver PPTs y completar resumen
+    - [X] 14 - Presentacion base de datos
+    - [X] 16 - Presentacion modelo relacional
+    - [X] 26 - Modelo datos y normalizacion
+    - [X] 29 - Inner y outter join, transactions, views, snapshots
+    - [X] 30 - Subqueries
+
+- [X] Práctica
+    - [X] Clase 19
+    - [X] Clase 21
+    - [X] Clase 23
+    - [-] Modelo de parcial

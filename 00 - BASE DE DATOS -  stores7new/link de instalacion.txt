@@ -1,0 +1,17 @@
+
+
+SqlServer 2012
+https://www.microsoft.com/es-es/download/details.aspx?id=56042
+https://microsoft-sql-server.uptodown.com/windows/descargar
+
+SSMS 2017-18
+https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-2017
+
+grupo Gmail
+utngdd-cursada@googlegroups.com
+
+https://youtu.be/HD5NryLhM14
+Aca si quieren hay un tuto de como instalar todo lo necesario para el tp y la cursada
+
+drive
+https://drive.google.com/drive/u/1/folders/0B27PgUCCYOICVUtfQmJPMVRhaDA
