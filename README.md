@@ -8,7 +8,7 @@ https://drive.google.com/drive/folders/1OsdQDTnFk-g8LwBQUTvj2QloaprqkBrj
 
 ## Resumen de material teórico - OneNote
 
-shorturl.at/pLNRY
+https://rb.gy/qshgom
 
 ## DER - stores7new
 
