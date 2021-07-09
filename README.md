@@ -8,7 +8,7 @@ https://drive.google.com/drive/folders/1OsdQDTnFk-g8LwBQUTvj2QloaprqkBrj
 
 ## Resumen de material teórico - OneNote
 
-https://estfrbautneduar-my.sharepoint.com/:o:/g/personal/asabalagos_est_frba_utn_edu_ar/EtAW4B4eSRBBmdxVS3quM4ABjTjl-aBOSVP8pVsRR3HuZg
+shorturl.at/pLNRY
 
 ## DER - stores7new
 
