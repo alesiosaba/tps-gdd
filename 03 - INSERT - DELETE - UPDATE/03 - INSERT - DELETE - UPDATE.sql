@@ -1,4 +1,3 @@
-
 -- Práctica - Clase 4
 USE stores7new;
 
