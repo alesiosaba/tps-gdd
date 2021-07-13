@@ -164,3 +164,4 @@ FROM customer C
                                 WHERE   p.stock_num = i.stock_num 
                                         AND p.manu_code = i.manu_code 
                                         AND o.customer_num = c.customer_num))
+                                        
