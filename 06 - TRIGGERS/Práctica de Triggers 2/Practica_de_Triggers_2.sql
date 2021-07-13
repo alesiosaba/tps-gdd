@@ -14,14 +14,13 @@
 GO
     CREATE trigger Tr_temaA ON items
     INSTEAD OF INSERT AS 
-        BEGIN 
-        
+    BEGIN   
         DECLARE @stock_num SMALLINT, @order_num SMALLINT, @item_num SMALLINT, @quantity SMALLINT
         DECLARE @unit_price DECIMAL(8,2) 
         DECLARE @manu_code CHAR(3), @state CHAR(2)
 
         DECLARE c_items CURSOR FOR 
-            SELECT i.item_num, i.order_num, stock_num, manu_code, quantity, unit_price, state 
+            SELECT i.item_num, i.order_num, stock_num, manu_code, quantity, unit_price, c.state 
             FROM inserted i 
                 JOIN orders o ON (i.order_num = o.order_num)
                 JOIN customer c ON (o.customer_num = c.customer_num) 
@@ -36,25 +35,25 @@ GO
             -- Si la orden de compra a la que pertenecen los ítems ingresados corresponde a clientes del estado de California,
             -- se deberá validar que estas órdenes puedan tener como máximo 5 registros en la tabla ítem.
             IF @state = 'CA' 
-                BEGIN
-                    -- para cada item se va a verificar que hayan 4 o menos items de esa orden 
-                    IF (SELECT COUNT(*) FROM items WHERE order_num = @order_num) < 5 
-                        BEGIN
-                            INSERT INTO items (i.item_num, i.order_num, stock_num, manu_code, quantity, unit_price) 
-                            VALUES(@item_num, @order_num, @stock_num, @manu_code, @quantity, @unit_price)
-                        END
-                    ELSE
-                        BEGIN 
-                            INSERT INTO items_error 
-                            VALUES(@item_num, @order_num, @stock_num, @manu_code, @quantity, @unit_price, GETDATE())
-                        END 
-                END 
+            BEGIN
+                -- para cada item se va a verificar que hayan 4 o menos items de esa orden 
+                IF (SELECT COUNT(*) FROM items WHERE order_num = @order_num) < 5 
+                    BEGIN
+                        INSERT INTO items (i.item_num, i.order_num, stock_num, manu_code, quantity, unit_price) 
+                        VALUES(@item_num, @order_num, @stock_num, @manu_code, @quantity, @unit_price)
+                    END
+                ELSE
+                    BEGIN 
+                        INSERT INTO items_error 
+                        VALUES(@item_num, @order_num, @stock_num, @manu_code, @quantity, @unit_price, GETDATE())
+                    END 
+            END 
             ELSE 
+            BEGIN
                 -- items que no son de ordenes de California
-                BEGIN
                 INSERT INTO items 
-                VALUES(@item_num, @order_num, @stock_num, @manu_code, @quantity, @unit_price) 
-                end
+                VALUES (@item_num, @order_num, @stock_num, @manu_code, @quantity, @unit_price) 
+            END
         
         FETCH FROM c_items 
         INTO @item_num, @order_num, @stock_num, @manu_code, @quantity, @unit_price, @state; 
@@ -92,7 +91,7 @@ GO
 GO
 
 -- 3. 
--- Crear un trigger que ante un INSERT o UPDATE de una o más filas de la tabla Customer, realice la siguiente validación.
+-- Crear un trigger que ante un UPDATE de una o más filas de la tabla Customer, realice la siguiente validación.
 
 -- La cuota de clientes correspondientes al estado de California es de 20, 
 -- si se supera dicha cuota se deberán grabar el resto de los clientes en la tabla customer_pend.
@@ -103,23 +102,24 @@ GO
     -- el trigger deberá modificar los 2 primeros en la tabla customer y los restantes grabarlos en la tabla customer_pend.
     -- La tabla customer_pend tendrá la misma estructura que la tabla customer con un atributo adicional fechaHora que deberá actualizarse con la fecha y hora del día.
 
-    CREATE TABLE customer_updates_pend (
-        customer_num SMALLINT NOT NULL,
-        fname VARCHAR(15),
-        lname VARCHAR(15),
-        company VARCHAR(20),
-        address1 VARCHAR(20),
-        address2 VARCHAR(20),
-        city VARCHAR(15),
-        state CHAR(2),
-        zipcode CHAR(5),
-        phone VARCHAR(18),
-        fecha DATETIME 
-    )
+CREATE TABLE customer_updates_pend (
+    customer_num SMALLINT NOT NULL,
+    fname VARCHAR(15),
+    lname VARCHAR(15),
+    company VARCHAR(20),
+    address1 VARCHAR(20),
+    address2 VARCHAR(20),
+    city VARCHAR(15),
+    state CHAR(2),
+    zipcode CHAR(5),
+    phone VARCHAR(18),
+    fecha DATETIME 
+)
 
 GO
+    -- lo hago solo para reponder ante UPDATE
     CREATE TRIGGER temaB ON customer
-    INSTEAD OF INSERT, UPDATE AS 
+    INSTEAD OF UPDATE AS 
     BEGIN 
         DECLARE @customer_num SMALLINT
         DECLARE @fname VARCHAR(15), @lname VARCHAR(15), @city VARCHAR(15)
@@ -129,9 +129,9 @@ GO
         DECLARE @phone VARCHAR(18)
         
         DECLARE c_call CURSOR FOR
-            SELECT i.*, d.state
-            FROM inserted I 
-                LEFT JOIN deleted d ON (i.customer_num=d.customer_num)
+            SELECT i.customer_num, i.name, i.lname, i.company, i.address1, i.address2, i.city, i.state, i.zipcode, i.phone, d.state
+            FROM inserted i 
+                JOIN deleted d ON (i.customer_num = d.customer_num)
         
         OPEN c_call 
         
@@ -140,9 +140,10 @@ GO
         
         WHILE @@FETCH_STATUS = 0 
         BEGIN 
-            IF @state = 'CA' AND @state != COALESCE(@state_old, 'ZZ')
+            -- para un UPDATE de clientes de California 
+            IF @state = 'CA' AND @state != @state_old
             BEGIN 
-                IF (SELECT COUNT(*) FROM customer where state='CA') < 20 
+                IF (SELECT COUNT(*) FROM customer where state = 'CA') < 20 
                 BEGIN 
                     UPDATE customer
                     SET fname = @fname, lname = @lname, company = @company, adress1 = @address1, address2 = @address2, 
@@ -152,7 +153,7 @@ GO
                 ELSE 
                 BEGIN 
                     INSERT INTO customer_pend
-                    VALUES (@customer_num, @fname, @lname, @company, @address1, @address2, @city, @state, @zipcode, @phone, getDate()) 
+                    VALUES (@customer_num, @fname, @lname, @company, @address1, @address2, @city, @state, @zipcode, @phone, GETDATE()) 
                 END 
             END 
             ELSE 
@@ -160,7 +161,7 @@ GO
                 UPDATE customer 
                 SET fname = @fname, lname = @lname, company = @company, address1 = @address1, address2 = @address2,
                     city = @city, state = @state, zipcode = @zipcode, phone = @phone 
-                WHERE customer_num=@customer_num 
+                WHERE customer_num = @customer_num 
             END 
             
             FETCH NEXT FROM c_call 
@@ -204,9 +205,9 @@ GO
 
 GO
     CREATE VIEW ordenesPendientes AS
-        SELECT c.customer_num, fname, lname, company, o.order_num, order_date 
+        SELECT c.customer_num, fname, lname, company, order_num, order_date 
         FROM customer c 
-            JOIN orders o ON c.customer_num=o.customer_num 
+            JOIN orders o ON c.customer_num = o.customer_num 
         WHERE paid_date IS NULL
 
 -- Si el cliente asociado a la orden tiene sólo esa orden pendiente de pago (paid_date IS NULL), no permita realizar la Baja, informando el error.
@@ -222,17 +223,17 @@ GO
         
         SELECT @cantidadOrdenesPendientes = COUNT(o.order_num)
         FROM orders o 
-            JOIN deleted d ON o.customer_num = d.customer_num AND o.paid_date IS NULL 
+            JOIN deleted d ON (o.customer_num = d.customer_num AND o.paid_date IS NULL)
         
         SELECT @cantidadItems = COUNT(i.item_num)
-        FROM items I 
+        FROM items i 
             JOIN deleted d ON i.order_num = d.order_num 
             
-        IF (@cantidadItems > 1)
-            THROW 50001, 'Error: La Orden posee mas de un item', 1 
-        
         IF(@cantidadOrdenesPendientes = 1) 
             THROW 50002,'Error: El cliente tiene solo 1 orden pendiente', 1 
+
+        IF (@cantidadItems > 1)
+            THROW 50001, 'Error: La Orden posee mas de un item', 1 
         
         DELETE FROM items 
         WHERE order_num = (SELECT order_num FROM deleted) 
