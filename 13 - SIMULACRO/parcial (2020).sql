@@ -2,37 +2,35 @@
 EJERCICIO 3
 Seleccionar código de fabricante, nombre fabricante, cantidad de órdenes del fabricante,
 Monto Total Vendido del fabricante sum(quantity * total_price) 
-y el promedio de las Montos vendidos de todos los Fabricantes. 
+y el promedio de los Montos vendidos de todos los Fabricantes. 
 
-SOLAMENTE MOSTRAR aquellos fabricantes cuyos Montos de ventas totales sean mayores al PROMEDIO de las ventas de TODOS los fabricantes.
+SOLAMENTE MOSTRAR aquellos fabricantes cuyos Montos de ventas totales sean mayores
+al PROMEDIO de las ventas de TODOS los fabricantes.
 
 Mostrar el resultado ordenado por cantidad total vendida en forma descendente.
 
 IMPORTANTE: No se pueden usar procedures, ni Funciones de usuario.
 
-manu_code   manu_name   CantOrdenes Total vendido 	Promedio de Todos
-ANZ         Anza        11          11081.80        3972.85
-SHM         Shimara     4           5677.91         3972.85
+manu_code	manu_name		CantOrdenes		Total vendido	Promedio de Todos 
+  ANZ         Anza              11             11081.80         3972.85 
+  SHM		 Shimara			4			   5677.91			3972.85
 
 */
 
 SELECT 
-	m.manu_code,
-	m.manu_name,
+	m.manu_code, 
+	manu_name, 
 	COUNT(DISTINCT i.order_num) AS CantOrdenes,
-	SUM(i.quantity * i.unit_price) AS 'Total vendido',
-	(SELECT 
-		SUM(i2.quantity * i2.unit_price) / COUNT(DISTINCT i2.manu_code)
-	FROM items i2) AS 'Promedio de Todos'
+	SUM(i.quantity * i.unit_price) AS Total_Vendido,
+	(SELECT SUM(quantity * unit_price) / COUNT(DISTINCT manu_code) FROM items) AS Promedio_De_Todos
 FROM manufact m
-	LEFT JOIN items i ON (i.manu_code = m.manu_code)
-GROUP BY m.manu_code, m.manu_name
+	JOIN items i ON i.manu_code = m.manu_code
+GROUP BY m.manu_code, manu_name
 HAVING 
-	sum(i.quantity * i.unit_price) 
-	>
-	(SELECT SUM(i2.quantity * i2.unit_price) / COUNT(DISTINCT i2.manu_code)
-	FROM items i2)
-ORDER BY SUM(i.quantity * i.unit_price) DESC
+	SUM(i.quantity * i.unit_price) 
+	> 
+	(SELECT SUM(quantity * unit_price) / COUNT(DISTINCT i2.manu_code) FROM items i2)
+ORDER BY SUM(i.quantity * i.unit_price) DESC 
 
 
 /* 
@@ -57,74 +55,45 @@ Tabla VENTASxMES
 El procedimiento debe manejar TODO el proceso en una transacción y deshacer todo en caso de error.
 */
 
-GO
 CREATE TABLE VENTASxMES(
-	anioMes decimal(6),
-	stock_num smallint,
-	manu_code char(3),
-	Cantidad int,
-	Monto decimal(10,2)
+	anioMes DECIMAL(6),
+	stock_num SMALLINT,
+	manu_code CHAR(3),
+	Cantidad INT,
+	Monto DECIMAL(10,2)
 )
-GO
 
 GO
-CREATE PROCEDURE llenadoVentasPorMes @fechaEjecucion DATETIME
-AS
+CREATE PROCEDURE ActualizarVentasxMes @fechaParam DATETIME
+AS 
 BEGIN
-	-- declaración de variables
-	DECLARE @unit char(4), @stock_num smallint, @manu_code char(3), @cantidad int, @montoTotal decimal(10,2),@cantidadResultante int;
-	
-	-- declaración de cursor
-	DECLARE ventaCursor
-	CURSOR FOR
-	SELECT u.unit, p.stock_num, p.manu_code, sum(i.quantity) cantidad, sum (i.quantity * i.unit_price) montoTotal
-	FROM orders o
-		left join items i ON (o.order_num = i.order_num)
-		left join products p ON (i.stock_num = p.stock_num AND i.manu_code= p.manu_code)
-		left join units u ON (u.unit_code = i.unit_price)
-	WHERE YEAR(o.order_date) = YEAR(@fechaEjecucion) AND
-		MONTH(o.order_date) = MONTH(@fechaEjecucion)
-	GROUP BY u.unit, p.stock_num, p.manu_code
-	
-	-- apertura de cursor
-	OPEN ventaCursor
-	
-	FETCH NEXT FROM ventaCursor 
-		INTO @unit, @stock_num, @manu_code , @cantidad , @montoTotal;
-	
 	BEGIN TRY
-	BEGIN TRANSACTION
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-	IF @unit NOT IN ('unid', 'par', 'doc')
-	BEGIN	
-		THROW 50000, 'Unidad errónea', 2
-		SET @cantidadResultante = CASE @unit
-		WHEN 'unid' THEN @cantidad
-		WHEN 'par' THEN @cantidad * 2
-		WHEN 'doc' THEN @cantidad * 12
-	END
+		BEGIN TRANSACTION
+
 		INSERT INTO VENTASxMES
-			(anioMes, stock_num, manu_code, Cantidad, Monto)
-		VALUES(YEAR(@fechaEjecucion)*100 + MONTH(@fechaEjecucion),@stock_num, @manu_code, @cantidadResultante, @montoTotal)
-		
-	END
-	
-	COMMIT TRANSACTION
-	
+		SELECT 
+			YEAR(@fechaParam) * 100 + MONTH(@fechaParam), 
+			i.stock_num,
+			m.manu_code,
+			SUM(i.quantity * (SELECT 'cant productos' = CASE WHEN u.unit = 'unid' THEN 1 WHEN u.unit = 'par' THEN 2 ELSE 12 END)),
+			SUM(i.quantity * p.unit_price)
+		FROM manufact m
+			JOIN items i ON i.manu_code = m.manu_code
+			JOIN orders o ON o.order_num = i.order_num
+			JOIN products p ON p.stock_num = i.stock_num AND p.manu_code = i.manu_code
+			JOIN units u ON u.unit_code = p.unit_code
+		WHERE YEAR(o.order_date) = YEAR(@fechaParam) 
+			  AND MONTH(o.order_date) = MONTH(@fechaParam)
+		GROUP BY i.stock_num, m.manu_code
+
+		COMMIT TRANSACTION
 	END TRY
+
 	BEGIN CATCH
 		ROLLBACK TRANSACTION
 	END CATCH
-	
-	FETCH NEXT FROM ventaCursor
-		INTO @unit, @stock_num, @manu_code , @cantidad , @montoTotal
-	-- cierre de cursor
-	CLOSE ventaCursor
-	DEALLOCATE ventaCursor
 END
 GO
-
 
 /*
 EJERCICIO 5
@@ -147,57 +116,87 @@ Dada la vista:
 */
 
 GO
-CREATE TRIGGER insertsProductosV ON ProductosV
-INSTEAD OF INSERT
-AS
+CREATE VIEW ProductosV 
+AS 
+SELECT 
+	p.stock_num, 
+	pt.description, 
+	p.manu_code, 
+	p.unit_price, 
+	p.unit_code, 
+	u.unit_descr 
+FROM products p 
+	JOIN product_types pt ON p.stock_num = pt.stock_num 
+	JOIN units u ON p.unit_code = u.unit_code
+GO
+
+SELECT * FROM ProductosV
+
+GO
+CREATE TRIGGER inserts_ProductosV ON ProductosV
+INSTEAD OF INSERT AS
 BEGIN
-	-- Declarado de variables
-	DECLARE @stock_num smallint ,@description varchar(15), @manu_code char(3), @unit_price decimal, @unit_code smallint,@unit_descr varchar(15);
 	
-	-- Creación de cursor
-	DECLARE insertedCursor
-	CURSOR FOR
-	SELECT stock_num, description, manu_code, unit_price, unit_code, unit_descr
+	DECLARE 
+		@stock_num SMALLINT, 
+		@description VARCHAR(15), 
+		@manu_code CHAR(3), 
+		@unit_price DECIMAL, 
+		@unit_code SMALLINT, 
+		@unit_descr VARCHAR(15)
+
+	DECLARE cursor_insert_ProdV CURSOR FOR
+	SELECT 
+		stock_num, 
+		description, 
+		manu_code, 
+		unit_price, 
+		unit_code, 
+		unit_descr
 	FROM inserted
-	
-	-- Apertura de cursor
-	OPEN insertedCursor
-	FETCH NEXT FROM insertedCursor 
-		INTO @stock_num, @description, @manu_code, @unit_price, @unit_code, @unit_descr;
-	
+
+	OPEN cursor_insert_ProdV
+
+	FETCH NEXT FROM cursor_insert_ProdV
+	INTO @stock_num, @description, @manu_code, @unit_price,	@unit_code,	@unit_descr
+
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-	BEGIN TRY
-	BEGIN TRANSACTION
-		IF EXISTS(SELECT * from products where stock_num = @stock_num AND manu_code = @manu_code)
-			THROW 50000, 'Clave duplicada', 2
 		
-		IF @manu_code NOT IN (SELECT manu_code FROM manufact)
-			THROW 51000, 'Fabricante no existente', 2
-		
-		IF @stock_num NOT IN (SELECT stock_num FROM product_types)
-			THROW 51000, 'Tipo de Producto no existente', 2
-		
-		IF @unit_code NOT IN (SELECT unit_code FROM units)
-			INSERT INTO units (unit_descr)
-			VALUES (@unit_descr)
-			
-			INSERT INTO products (stock_num,manu_code,unit_price,unit_code)
-			VALUES (@stock_num, @manu_code, @unit_price, @unit_code)
+		BEGIN TRY
+			BEGIN TRANSACTION
+				-- En caso que ya exista el Producto, informar el mensaje �Clave duplicada�.
+				IF EXISTS(SELECT 1 FROM products WHERE stock_num = @stock_num AND manu_code = @manu_code)
+					THROW 50000, 'Clave duplicada', 1
+					
+				-- Si no existe el fabricante o el tipo de producto informar el error. 
+				IF NOT EXISTS(SELECT 1 FROM manufact WHERE manu_code = @manu_code)
+					THROW 50000, 'No existe el fabricante', 1
 
-	COMMIT TRANSACTION
-	END TRY
-	BEGIN CATCH
-		ROLLBACK TRANSACTION
-	END CATCH
-	
-	FETCH NEXT FROM insertedCursor 
-		INTO @stock_num, @description, @manu_code, @unit_price, @unit_code, @unit_descr;
-	
+				IF NOT EXISTS(SELECT 1 FROM product_types WHERE stock_num = @stock_num)
+					THROW 50000, 'No existe el fabricante', 1
+
+				-- Si no existe la unidad insertarla en la tabla correspondiente. 
+				IF NOT EXISTS(SELECT 1 FROM units WHERE unit_code = @unit_code)
+					INSERT INTO units (unit_code,unit_descr)
+					VALUES(@unit_code, @unit_descr)
+					
+				INSERT INTO ProductosV (stock_num, description, manu_code, unit_price, unit_code, unit_descr)
+				VALUES(@stock_num, @description, @manu_code, @unit_price, @unit_code, @unit_descr)
+
+			COMMIT TRANSACTION
+		END TRY
+
+		BEGIN CATCH
+			ROLLBACK TRANSACTION
+		END CATCH
+
+		FETCH NEXT FROM cursor_insert_ProdV
+		INTO @stock_num, @description, @manu_code, @unit_price,	@unit_code,	@unit_descr
+
 	END
-	
-	-- Cierre de cursor
-	CLOSE insertedCursor
-	DEALLOCATE insertedCursor
+
+	CLOSE cursor_insert_ProdV
+	DEALLOCATE cursor_insert_ProdV
 END
 GO
