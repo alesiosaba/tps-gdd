@@ -85,7 +85,8 @@ BEGIN
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-	BEGIN TRY
+		BEGIN TRY
+		
 		BEGIN TRANSACTION
 		-- Si no existe el Fabricante, devolver un error de Fabricante inexistente y descartar la novedad.
 		IF NOT EXISTS (SELECT 1 FROM manufact WHERE manu_code = @manu_code)
@@ -103,15 +104,17 @@ BEGIN
 		-- Si no existe, Insertarlo en la tabla de productos.
 		ELSE
 			INSERT INTO products VALUES (@stock_num, @manu_code, @unit_price, @unit_code)
-	END TRY
-	BEGIN CATCH
-		ROLLBACK TRANSACTION
-	END CATCH
+		
+		COMMIT TRANSACTION
+	
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRANSACTION
+		END CATCH
 
 		FETCH NEXT FROM cursor_novedades
 			INTO @stock_num, @manu_code, @descTipoProducto, @unit_price, @unit_code
 
-		COMMIT TRANSACTION
 	END
 
 	CLOSE cursor_novedades
