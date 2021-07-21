@@ -1,0 +1,48 @@
+"Para el coloquio tienen que tener bien claro todos los apuntes que dimos tanto teóricos (Enrique) como teóricos prácticos (yo). Tomaremos 2/3 preguntas que tienen que estar por arriba de 6 el promedio."
+
+"Como el coloquio es oral es necesario que manden un mail a mi anotándose, ya que es individual y se toma cada 15 minutos por persona. La condición para dar coloquio, los dos parciales con 8 o más y el TP aprobado."
+
+Se rinde con cámara.
+
+----------------------------------------------------------------------------------------
+
+1ra pregunta: Isolation levels para qué sirven y cuales son.
+
+2da pregunta: Índices para qué sirven, ventajas, desventajas, tipos de índices, qué haría ante una migración grande de datos.
+
+3ra pregunta: Explicar arquitectura Ansi/Sparc.
+
+----------------------------------------------------------------------------------------
+
+1ra pregunta: explicar reglas de Integridad y con que se implementaria en una base
+
+¿Si tuvieras que checkear al insertar o borrar datos a una tabla que tengan referencias a otra tabla en otra db como lo harias?
+
+2da pregunta: explicar distintos tipos de backups
+
+3ra pregunta: algoritmos de compresión
+
+----------------------------------------------------------------------------------------
+
+1era: explicar independencia lógica y física en una base de datos
+
+2da: explicar todo lo que sepa de triggers
+
+3er: explicar algoritmos de ordenamiento heap sort, merge sort y quick sort. Con orden de complejidad y como varia si vienen los datos ordenados de distinta manera.
+
+---------------------------------------------------------------------------------------------
+
+Recopilación de preguntas de coloquio:
+1. Isolation levels
+2. Vistas
+3. Transacciones
+4. Diferencia entre store procedures y funciones
+5. Reglas de integridad de Codd
+6. Como harías para implementar relaciones entre dos tablas de distintas db y
+   servidores: Se pueden utilizar triggers para implementar foreign keys de tablas de
+   distintas bases.
+7. Como se implementa el dominio
+8. Como limitar el dominio
+9. Dónde se pueden usar subquerys dentro de un select: dónde no? 
+10. Qué es una query correlacionada. Es más performante que una normal? Es menos performante.
+11. Cómo se manejan excepcines? Las excepciones se manejan con THROW, bloque TRY - CATCH y con raiserror.
