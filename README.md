@@ -12,7 +12,11 @@ https://drive.google.com/drive/folders/1G69MdAS6XPb43yfV7N1C0O6fHouW6ZQb
 
 ## Resumenes de material teórico - OneNote
 
+### Zaffaroni
 https://rb.gy/qshgom
+
+### Reinosa
+https://acortar.link/GE7VnH
 
 ## DER - stores7new
 
