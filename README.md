@@ -4,9 +4,13 @@
 
 ## Material teórico y clases grabadas
 
+### Zaffaroni (Miércoles)
 https://drive.google.com/drive/folders/1OsdQDTnFk-g8LwBQUTvj2QloaprqkBrj
 
-## Resumen de material teórico - OneNote
+### Reinosa (Lunes)
+https://drive.google.com/drive/folders/1G69MdAS6XPb43yfV7N1C0O6fHouW6ZQb
+
+## Resumenes de material teórico - OneNote
 
 https://rb.gy/qshgom
 
