@@ -17,3 +17,7 @@ https://rb.gy/qshgom
 ## Repositorio TP Grupal 2021
 
 https://github.com/alesiosaba/tp-gdd-2021
+
+## Otro TP Grupal (2020)
+
+https://github.com/SwaXTech/UTN-GDD-BBDD-Concesionaria
