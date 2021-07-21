@@ -18,10 +18,6 @@ https://rb.gy/qshgom
 ### Reinosa
 https://acortar.link/GE7VnH
 
-## DER - stores7new
-
-![DER_stores7new](https://user-images.githubusercontent.com/62452207/125124125-ffd50480-e0cd-11eb-8a08-ddc714eba01c.png)
-
 ## Repositorio TP Grupal 2021
 
 https://github.com/alesiosaba/tp-gdd-2021
