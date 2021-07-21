@@ -5,15 +5,12 @@
 Se rinde con cámara.
 
 ----------------------------------------------------------------------------------------
-
 1ra pregunta: Isolation levels para qué sirven y cuales son.
 
 2da pregunta: Índices para qué sirven, ventajas, desventajas, tipos de índices, qué haría ante una migración grande de datos.
 
 3ra pregunta: Explicar arquitectura Ansi/Sparc.
-
 ----------------------------------------------------------------------------------------
-
 1ra pregunta: explicar reglas de Integridad y con que se implementaria en una base
 
 ¿Si tuvieras que checkear al insertar o borrar datos a una tabla que tengan referencias a otra tabla en otra db como lo harias?
@@ -21,18 +18,22 @@ Se rinde con cámara.
 2da pregunta: explicar distintos tipos de backups
 
 3ra pregunta: algoritmos de compresión
-
 ----------------------------------------------------------------------------------------
-
 1era: explicar independencia lógica y física en una base de datos
 
 2da: explicar todo lo que sepa de triggers
 
 3er: explicar algoritmos de ordenamiento heap sort, merge sort y quick sort. Con orden de complejidad y como varia si vienen los datos ordenados de distinta manera.
+---------------------------------------------------------------------------------------------
+1er: Explicar todo lo que sepa de arboles
 
+2da: Hablar sobre consistencia en los motores de BBDD
+
+3era: Explicar y ejemplificar cada constraint y como se relacionan con el concepto de dominio de CODD
 ---------------------------------------------------------------------------------------------
 
 Recopilación de preguntas de coloquio:
+
 1. Isolation levels
 2. Vistas
 3. Transacciones
