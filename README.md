@@ -13,10 +13,10 @@ https://drive.google.com/drive/folders/1G69MdAS6XPb43yfV7N1C0O6fHouW6ZQb
 ## Resumenes de material teórico - OneNote
 
 ### Zaffaroni
-https://rb.gy/qshgom
+https://tinyurl.com/zaffaroni-OneNote
 
 ### Reinosa
-https://acortar.link/GE7VnH
+https://tinyurl.com/reinosa-OneNote
 
 ## Repositorio TP Grupal 2021
 
