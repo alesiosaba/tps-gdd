@@ -17,38 +17,7 @@ si los productos con cantidades iguales son del mismo estado,
 ordenar además por descripción del tipo de producto en forma ascendente.
 */
 
-SELECT 
-	j.Cod_Estado AS Cod_Estado,
-	j.Descripcion_Estado AS Descripcion_Estado,
-	stock_num AS Cod_Tipo_Producto,
-	description AS Descripcion_Tipo_Producto,
-	j.Cant_Total_Vendida AS Cant_Total_Vendida
-FROM product_types pto
-RIGHT JOIN 
-(
-	SELECT 
-		st.state AS Cod_Estado,
-		st.sname AS Descripcion_Estado,
-		pt.stock_num AS Cod_Tipo_Producto,
-		pt.description AS Descripcion_Tipo_Producto,
-		SUM(i.quantity) AS Cant_Total_Vendida
-	FROM items i 
-		JOIN product_types pt ON pt.stock_num = i.stock_num
-		JOIN orders o ON o.order_num = i.order_num
-		JOIN customer c ON c.customer_num = o.customer_num  
-		JOIN state st ON st.state = c.state
-	GROUP BY st.state, st.sname, pt.stock_num, pt.description
-	HAVING SUM(i.quantity) =   
-	(SELECT TOP 1 SUM(i.quantity)
-	 FROM items i
-		JOIN orders o ON o.order_num = i.order_num
-		JOIN customer c ON c.customer_num = o.customer_num  
-		JOIN state st ON st.state = c.state
-	GROUP BY st.state, i.stock_num
-	ORDER BY 1 DESC)
-) j ON j.Cod_Tipo_Producto = pto.stock_num AND j.Descripcion_Tipo_Producto = pto.description
 
-ORDER BY j.Cant_Total_Vendida, j.Descripcion_Estado, pto.description
 
 ------------------------------------------------------------------
 

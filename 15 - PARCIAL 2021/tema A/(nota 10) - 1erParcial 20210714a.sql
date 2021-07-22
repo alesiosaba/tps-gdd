@@ -1,40 +1,39 @@
+
+
+
 USE stores7new;
 
 -- Query
 
 SELECT
-    c1.lname AS Referido_Apellido,
-    c1.fname AS Referido_Nombre,
-	(SELECT SUM(i2.quantity * i2.unit_price) / COUNT(DISTINCT o2.order_num) 
-		FROM items i2 JOIN orders o2 ON (o2.order_num = i2.order_num)
-		WHERE o2.customer_num =  c1.customer_num ) AS Promedio_Referido,
-	referente.lname AS Referente_Apellido,
-    referente.fname AS Referente_Nombre,
-	referente.Promedio_Referente
-FROM customer c1
-    JOIN orders o1 ON (o1.customer_num = c1.customer_num)
-	JOIN items i1 ON (i1.order_num = o1.order_num)
-	
-	JOIN (SELECT 
-			c2.customer_num,
-			lname,
-			fname,
-			SUM(i3.quantity * i3.unit_price) / COUNT(DISTINCT o3.order_num) AS Promedio_Referente
-			FROM customer c2
-				JOIN orders o3 ON (o3.customer_num = c2.customer_num) 
-				JOIN items i3 ON (i3.order_num = o3.order_num)
-			GROUP BY c2.customer_num, lname, fname
-			) referente ON (referente.customer_num = c1.customer_num_referedBy)
-
-GROUP BY c1.lname, c1.fname, referente.lname, referente.fname, referente.Promedio_Referente
-	HAVING 
-		(SELECT SUM(i2.quantity * i2.unit_price) / COUNT(DISTINCT o2.order_num) 
-		FROM items i2 JOIN orders o2 ON (o2.order_num = i2.order_num)
-		WHERE o2.customer_num =  c1.customer_num )
-		>
-		referente.Promedio_Referente
-ORDER BY c1.lname, c1.fname		
-
+    referido.lname apellido_referido,
+    referido.fname nombre_referido,
+    SUM(i.quantity * i.unit_price)/COUNT(DISTINCT o.order_num) promedio_referido,
+    referente.lname apellido_referente,
+    referente.fname nombre_referente,
+    referente.promedio promedio_referente
+FROM customer referido
+    JOIN orders o ON o.customer_num=referido.customer_num
+    JOIN items i ON o.order_num=i.order_num
+    JOIN (
+    SELECT
+        c.customer_num,
+        c.lname,
+        c.fname,
+        SUM(i2.quantity * i2.unit_price)/COUNT(DISTINCT o2.order_num) promedio
+    FROM customer c
+        JOIN orders o2 ON o2.customer_num=c.customer_num
+        JOIN items i2 ON o2.order_num=i2.order_num
+    GROUP BY c.customer_num, c.lname, c.fname
+) referente ON referente.customer_num=referido.customer_num_referedBy
+WHERE referido.customer_num_referedBy IS NOT NULL
+GROUP BY referido.customer_num, referido.lname, referido.fname,
+        referente.customer_num, referente.fname, referente.lname, referente.promedio
+HAVING 
+    SUM(i.quantity * i.unit_price)/COUNT(DISTINCT o.order_num) 
+    > 
+    referente.promedio
+ORDER BY nombre_referido, apellido_referido
 
 
 
