@@ -1,3 +1,15 @@
+# Ejercicios Prácticos - Gestión de Datos 2021
+
+## Curso - K3013 - Zaffaroni
+
+## Material teórico y clases grabadas
+
+### Zaffaroni (Miércoles)
+https://tinyurl.com/zaffaroni-drive
+
+### Reinosa (Lunes)
+https://tinyurl.com/reinosa-drive
+
 ## Resumenes de material teórico - OneNote
 
 ### Zaffaroni
